@@ -59,7 +59,7 @@ const gamePass = "wearySeagull7"
 const startStop = async () => {
     let ulrText = props.game_on ? "stop" : "start"
 
-    const {error} = await useFetch(baseApiUrl + `/game/${gameId}/${ulrText}`, {
+    const {error} = await useFetch(baseApiUrl + `/game/${ulrText}`, {
         method: 'put',
         headers: {
             'Content-Type': 'application/json'
@@ -73,7 +73,7 @@ const startStop = async () => {
 }
 
 const playPause = async () => {
-    const {error} = await useFetch(baseApiUrl + `/game/${gameId}/pause`, {
+    const {error} = await useFetch(baseApiUrl + `/game/pause`, {
         method: 'put',
         headers: {
             'Content-Type': 'application/json'

@@ -5,15 +5,15 @@
                           :teamsId="[teamBlueId,teamRedId]"></ControlPanel>
         </v-row>
 
-        <v-row justify="center" align="center" no-gutters>
+        <v-row justify="center" align="center" no-gutters >
             <v-col cols="5">
-                <Score orientation="left" :team="gameState.teams[teamBlueId]"/>
+                <Score orientation="left" :team="gameState.teams[teamBlueId]" :key="iter" />
             </v-col>
             <v-col cols="2">
                 <Clock :time-left="gameState.time_left"></Clock>
             </v-col>
             <v-col cols="5">
-                <Score orientation="right" :team="gameState.teams[teamRedId]"/>
+                <Score orientation="right" :team="gameState.teams[teamRedId]" :key="iter+10000"/>
             </v-col>
 
         </v-row>
@@ -38,26 +38,28 @@ import MyCanvas from "~/components/gamePage/MyCanvas.vue";
 const {gameId} = useRoute().params
 const {baseApiUrl} = useRuntimeConfig()
 
-const def_team = {
-    "id": 0,
-    "color": "red",
-    "name": "Placeholder",
-    "score": 0,
-    "fuel": 25,
-    "charging": true
-}
+let iter = ref(0)
 
 const {data: gameState, refresh} = await useFetch(baseApiUrl + `/game/${gameId}`, {
-    method: 'GET'
+    method: 'GET',
 })
 
 if (!gameState.value) {
     throw createError({statusCode: 404, statusMessage: 'Game does not exist!', fatal: true})
 }
 
-const teams = gameState.value.teams
-const teamBlueId = Object.values(teams).find(t => t.color === 'blue').id
-const teamRedId = Object.values(teams).find(t => t.color === 'red').id
+const teamBlueId = ref(Object.values(gameState.value.teams).find(t => t.color === 'blue').id)
+const teamRedId = ref(Object.values(gameState.value.teams).find(t => t.color === 'red').id)
+
+const updateTeams = () => {
+    const btI = Object.values(gameState.value.teams).find(t => t.color === 'blue')
+    const rtI = Object.values(gameState.value.teams).find(t => t.color === 'red')
+
+    teamBlueId.value = btI && btI.id || 0
+    teamRedId.value = rtI && rtI.id || 0
+
+    iter.value += iter.value < 10000 ? 1 : -10000
+}
 
 const canvasDiv = ref(null)
 let canvasWidth = ref(600)
@@ -69,6 +71,7 @@ onMounted(() => {
         canvasWidth.value = canvasDiv.value.clientWidth
         canvasWidth.value = Math.min(canvasWidth.value, window.innerHeight)
         refresh()
+        updateTeams()
     }, 100);
 
 })

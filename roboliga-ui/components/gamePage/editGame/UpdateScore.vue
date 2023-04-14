@@ -36,6 +36,7 @@
 const {baseApiUrl} = useRuntimeConfig()
 
 const {gameId} = useRoute().params
+const props = defineProps(['teamsId'])
 const emit = defineEmits(['snackBarEmit'])
 
 const valid = ref(false)
@@ -52,16 +53,15 @@ const numberRules = [
 
 async function validate() {
     const {valid} = await inputForm.value.validate()
-
     if (valid) {
-        const {data, error} = await useFetch(baseApiUrl + `/game/${gameId}/score`, {
+        const {data, error} = await useFetch(baseApiUrl + `/game/score`, {
             method: 'put',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: {
-                "team_1": Number(blueTeam.value),
-                "team_2": Number(redTeam.value)
+                [props.teamsId[0]]: Number(blueTeam.value),
+                [props.teamsId[1]]: Number(redTeam.value)
             },
             credentials: 'include'
         });

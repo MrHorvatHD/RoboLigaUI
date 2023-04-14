@@ -29,10 +29,22 @@ export default {
     props: ["orientation", "team"],
     setup(props) {
 
+        /*const def_team = {
+            "id": 0,
+            "color": "red",
+            "name": "Placeholder",
+            "score": 0,
+            "fuel": 25,
+            "charging": true
+        }*/
+
+        //const team = ref(props.team.name && props.team || def_team)
+        const team = ref(props.team)
+
         const MAX_FUEL = config.robot_time
 
         const fuelPercent = computed(() => {
-             return props.team.fuel / MAX_FUEL * 100
+             return team.value.fuel / MAX_FUEL * 100
         })
 
         const scoreField = computed(() => {
@@ -59,7 +71,7 @@ export default {
 
 
 
-        return {fuelPercent, scoreField}
+        return {fuelPercent, scoreField, team}
     },
 
 

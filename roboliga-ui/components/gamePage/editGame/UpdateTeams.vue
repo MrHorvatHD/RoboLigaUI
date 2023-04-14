@@ -75,14 +75,14 @@ async function validate() {
     const {valid} = await inputForm.value.validate()
 
     if (valid) {
-        const {data, error} = await useFetch(baseApiUrl + `/game/${gameId}/teams`, {
+        const {data, error} = await useFetch(baseApiUrl + `/game/teams`, {
             method: 'put',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: {
-                "team_1": String(blueTeam.value),
-                "team_2": String(redTeam.value)
+                "team_1": Number(blueTeam.value),
+                "team_2": Number(redTeam.value)
             },
             credentials: 'include'
         });

@@ -13,7 +13,7 @@
 
                 <UpdateTeams :teamsId="teamsId" @snackBarEmit="openSnackbar"/>
 
-                <UpdateScore @snackBarEmit="openSnackbar"/>
+                <UpdateScore :teamsId="teamsId" @snackBarEmit="openSnackbar"/>
 
                 <UpdateTime @snackBarEmit="openSnackbar"/>
 
