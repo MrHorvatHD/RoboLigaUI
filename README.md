@@ -14,13 +14,6 @@ To configure game parameters change the values in [config.json](./roboliga-ui/co
 // note the following parameters
 name: "Robo liga Fri 2023: Rudnik", // name on the website's landing page
 robot_time: 25, // max fuel time of the robot
-fields_names: [ // IDs of the fields in the game
-    "game_field",
-    "blue_basket",
-    "red_basket",
-    "charging_station_1",
-    "charging_station_2"
-], 
 field_key: "game_field" // needs to match the ID of the field that defines the entire arena
 ```
 
@@ -38,4 +31,4 @@ runtimeConfig: {
 
 ## License
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENCE)

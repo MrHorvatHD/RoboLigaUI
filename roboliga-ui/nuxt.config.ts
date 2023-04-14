@@ -14,7 +14,7 @@ export default defineNuxtConfig({
     ],
     runtimeConfig:{
         public: {
-            baseApiUrl: 'http://localhost:8088',
+            baseApiUrl: 'http://192.168.0.3:8088',
         }
     },
     build: {

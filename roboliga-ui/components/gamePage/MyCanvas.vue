@@ -86,7 +86,7 @@ function CanvasManager(w, h) {
         // Save the canvas context state, so we can restore it later
         context.save();
         // Set the cube color
-        context.fillStyle = this.findColorById(key);
+        context.fillStyle = config.field_colors.undefined;
         // Translate the canvas context to the center of the cube
         context.translate(cube.position.x * scale, cube.position.y * scale);
         // Rotate the canvas context by the cube's direction in degrees

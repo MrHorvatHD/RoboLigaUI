@@ -36,6 +36,7 @@ import Score from "~/components/gamePage/Score.vue";
 import MyCanvas from "~/components/gamePage/MyCanvas.vue";
 
 const {gameId} = useRoute().params
+const {baseApiUrl} = useRuntimeConfig()
 
 const def_team = {
     "id": 0,
@@ -46,7 +47,7 @@ const def_team = {
     "charging": true
 }
 
-const {data: gameState, refresh} = await useFetch(`http://localhost:8088/game/${gameId}`, {
+const {data: gameState, refresh} = await useFetch(baseApiUrl + `/game/${gameId}`, {
     method: 'GET'
 })
 

@@ -1,13 +1,6 @@
 {
   "name": "Robo liga Fri 2023: Rudnik",
   "robot_time": 25,
-  "fields_names": [
-    "game_field",
-    "blue_basket",
-    "red_basket",
-    "charging_station_1",
-    "charging_station_2"
-  ],
   "field_key": "game_field",
   "robots": {
     "0": "Hansformers",
