@@ -60,8 +60,10 @@
 
 <script setup>
 import config from "~/config.json"
-const {baseApiUrl} = useRuntimeConfig()
+import {useAuthStore} from "~/stores/auth";
 
+const {baseApiUrl} = useRuntimeConfig()
+const auth = useAuthStore()
 const emit = defineEmits(['gameCreated', 'closeModal'])
 
 const snackbar = ref(false)
@@ -116,6 +118,8 @@ async function create() {
         snackbar.value = true
         snackbarText.value = "Game created successfully"
         snackbarColor.value = ""
+
+        auth.addGame(data.value)
 
         gameData.value = data.value
         emit('gameCreated')

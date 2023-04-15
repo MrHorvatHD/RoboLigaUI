@@ -12,6 +12,9 @@ export default defineNuxtConfig({
         "vuetify/lib/styles/main.sass",
         "@mdi/font/css/materialdesignicons.min.css"
     ],
+    modules: [
+        '@pinia/nuxt',
+    ],
     runtimeConfig:{
         public: {
             //baseApiUrl: 'http://192.168.0.3:8088',

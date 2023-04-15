@@ -45,9 +45,11 @@
 
 <script setup>
 import EditGameModal from "~/components/gamePage/editGame/EditGameModal.vue";
+import {useAuthStore} from "~/stores/auth";
 
+const {$promptPassword} = useNuxtApp()
+const auth = useAuthStore()
 const {baseApiUrl} = useRuntimeConfig()
-
 const props = defineProps(['game_on', 'game_paused', 'teamsId'])
 const {gameId} = useRoute().params
 let dialog = ref(false)
@@ -55,20 +57,26 @@ let dialog = ref(false)
 const snackbar = ref(false)
 const snackbarText = ref("")
 
-const gamePass = "wearySeagull7"
 const startStop = async () => {
     let ulrText = props.game_on ? "stop" : "start"
 
     const {error} = await useFetch(baseApiUrl + `/game/${ulrText}`, {
         method: 'put',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': 'Basic ' + btoa(`${gameId}:${auth.getPass(gameId)}`)
         },
-        credentials: 'include'
     });
     if (error.value) {
-        snackbar.value = true
-        snackbarText.value = `Error ${props.game_on ? 'stopping' : 'starting'} the game`
+        if (error.value.status === 401) {
+
+            $promptPassword(gameId)
+
+        } else {
+            snackbar.value = true
+            snackbarText.value = `Error ${props.game_on ? 'stopping' : 'starting'} the game`
+        }
+
     }
 }
 
@@ -76,14 +84,20 @@ const playPause = async () => {
     const {error} = await useFetch(baseApiUrl + `/game/pause`, {
         method: 'put',
         headers: {
-            'Content-Type': 'application/json'
-
+            'Content-Type': 'application/json',
+            'Authorization': 'Basic ' + btoa(`${gameId}:${auth.getPass(gameId)}`)
         },
-        credentials: 'include'
     });
     if (error.value) {
-        snackbar.value = true
-        snackbarText.value = `Error ${props.game_paused ? 'resuming' : 'pausing'} the game`
+        if (error.value.status === 401) {
+
+            $promptPassword(gameId)
+
+        } else {
+            snackbar.value = true
+            snackbarText.value = `Error ${props.game_paused ? 'resuming' : 'pausing'} the game`
+        }
+
     }
 
 }

@@ -36,8 +36,11 @@
 
 <script setup>
 import config from "~/config.json";
-const {baseApiUrl} = useRuntimeConfig()
+import {useAuthStore} from "~/stores/auth";
 
+const {$promptPassword} = useNuxtApp()
+const {baseApiUrl} = useRuntimeConfig()
+const auth = useAuthStore()
 const {gameId} = useRoute().params
 const props = defineProps(['teamsId'])
 const emit = defineEmits(['snackBarEmit'])
@@ -78,16 +81,21 @@ async function validate() {
         const {data, error} = await useFetch(baseApiUrl + `/game/teams`, {
             method: 'put',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Basic ' + btoa(`${gameId}:${auth.getPass(gameId)}`)
             },
             body: {
                 "team_1": Number(blueTeam.value),
                 "team_2": Number(redTeam.value)
             },
-            credentials: 'include'
         });
         if (error.value) {
-            emit('snackBarEmit', error.value, "error")
+            if (error.value.status === 401) {
+
+                $promptPassword(gameId)
+
+            } else
+                emit('snackBarEmit', error.value, "error")
         } else if (data.value) {
             emit('snackBarEmit', "Teams changed successfully", "")
         }
