@@ -1,7 +1,7 @@
 <template>
     <v-form ref="inputForm" v-model="valid">
         <v-row justify="center" align="center">
-            <v-col cols="4">
+            <v-col cols="6" md="4">
                 <v-select
                         v-model="blueTeam"
                         label="Blue team"
@@ -13,7 +13,7 @@
                 ></v-select>
             </v-col>
 
-            <v-col cols="4">
+            <v-col cols="6" md="4">
                 <v-select
                         v-model="redTeam"
                         label="Red team"
@@ -24,7 +24,7 @@
                         item-value="value"
                 ></v-select>
             </v-col>
-            <v-col cols="4">
+            <v-col cols="12" md="4">
                 <v-btn color="primary" variant="text" @click="validate">
                     change teams
                 </v-btn>

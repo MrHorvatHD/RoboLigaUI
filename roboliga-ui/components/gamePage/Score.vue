@@ -1,11 +1,11 @@
 <template>
     <v-container>
-        <v-row :justify="scoreField.justify" align="center" >
+        <v-row :justify="scoreField.justify" align="center">
             <v-col cols="9" md="9" lg="10" :order="scoreField.order1">
-                <div class="text-h3 myFont" :class="scoreField.text">{{team.name }}</div>
+                <div class="text-h5 text-md-h3 myFont" style="word-break: break-word" :class="scoreField.text">{{team.name }}</div>
             </v-col>
             <v-col cols="3" md="3" lg="2" :order="scoreField.order2">
-                <div class="text-h1 myFont" :class="scoreField.text">{{ team.score }}</div>
+                <div class="text-h5 text-md-h1 myFont" :class="scoreField.text">{{ team.score }}</div>
             </v-col>
         </v-row>
         <v-row justify="center" align="center">
@@ -38,7 +38,6 @@ export default {
             "charging": true
         }*/
 
-        //const team = ref(props.team.name && props.team || def_team)
         const team = ref(props.team)
 
         const MAX_FUEL = config.robot_time

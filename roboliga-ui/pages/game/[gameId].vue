@@ -6,13 +6,13 @@
         </v-row>
 
         <v-row justify="center" align="center" no-gutters >
-            <v-col cols="5">
+            <v-col cols="5" md="5" >
                 <Score orientation="left" :team="gameState.teams[teamBlueId]" :key="iter" />
             </v-col>
-            <v-col cols="2">
+            <v-col cols="2" md="2"   >
                 <Clock :time-left="gameState.time_left"></Clock>
             </v-col>
-            <v-col cols="5">
+            <v-col cols="5" md="5" >
                 <Score orientation="right" :team="gameState.teams[teamRedId]" :key="iter+10000"/>
             </v-col>
 

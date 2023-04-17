@@ -1,5 +1,5 @@
 <template>
-    <div class="text-h2 text-grey text-center myFont">
+    <div class="text-h5 text-md-h2 text-grey text-center myFont pt-2 pt-md-0">
         {{timeLeft}}
     </div>
 </template>
