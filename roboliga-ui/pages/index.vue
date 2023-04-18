@@ -18,7 +18,7 @@
             </v-col>
         </v-row>
 
-        <v-row v-if="games">
+        <v-row v-if="games && games.length > 0">
             <v-col v-for="game in games" :key="game" cols="6" md="4" class="text-h5">
                 <GameCard :gameId="game"/>
             </v-col>
@@ -65,6 +65,8 @@ let dialog = ref(false)
 const {data: games, refresh} = await useFetch(baseApiUrl + `/game/`, {
     method: 'GET'
 })
+
+console.log()
 
 </script>
 

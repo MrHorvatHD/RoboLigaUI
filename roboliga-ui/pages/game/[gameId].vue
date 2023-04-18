@@ -1,31 +1,31 @@
 <template>
-    <v-container fluid class="ma-0 pa-0">
-        <v-row justify="center" align="center">
-            <ControlPanel :game_on="gameState.game_on" :game_paused="gameState.game_paused"
-                          :teamsId="[teamBlueId,teamRedId]"></ControlPanel>
-        </v-row>
+  <v-container fluid class="ma-0 pa-0">
+    <v-row justify="center" align="center">
+      <ControlPanel :game_on="gameState.game_on" :game_paused="gameState.game_paused"
+                    :teamsId="[teamBlueId,teamRedId]"></ControlPanel>
+    </v-row>
 
-        <v-row justify="center" align="center" no-gutters >
-            <v-col cols="5" md="5" >
-                <Score orientation="left" :team="gameState.teams[teamBlueId]" :key="iter" />
-            </v-col>
-            <v-col cols="2" md="2"   >
-                <Clock :time-left="gameState.time_left"></Clock>
-            </v-col>
-            <v-col cols="5" md="5" >
-                <Score orientation="right" :team="gameState.teams[teamRedId]" :key="iter+10000"/>
-            </v-col>
+    <v-row justify="center" align="center" no-gutters>
+      <v-col cols="5" md="5">
+        <Score orientation="left" :team="gameState.teams[teamBlueId]" :key="iter"/>
+      </v-col>
+      <v-col cols="2" md="2">
+        <Clock :time-left="gameState.time_left"></Clock>
+      </v-col>
+      <v-col cols="5" md="5">
+        <Score orientation="right" :team="gameState.teams[teamRedId]" :key="iter+10000"/>
+      </v-col>
 
-        </v-row>
+    </v-row>
 
-        <v-row justify="center" align="center">
-            <v-col cols="10">
-                <div ref="canvasDiv" class="text-center">
-                    <MyCanvas :gameState="gameState" :canvasWidth="canvasWidth"/>
-                </div>
-            </v-col>
-        </v-row>
-    </v-container>
+    <v-row justify="center" align="center">
+      <v-col cols="10">
+        <div ref="canvasDiv" class="text-center">
+          <MyCanvas :gameState="gameState" :canvasWidth="canvasWidth"/>
+        </div>
+      </v-col>
+    </v-row>
+  </v-container>
 
 </template>
 
@@ -41,23 +41,71 @@ const {baseApiUrl} = useRuntimeConfig()
 let iter = ref(0)
 
 const {data: gameState, refresh} = await useFetch(baseApiUrl + `/game/${gameId}`, {
-    method: 'GET',
+  method: 'GET',
 })
 
 if (!gameState.value) {
-    throw createError({statusCode: 404, statusMessage: 'Game does not exist!', fatal: true})
+  throw createError({statusCode: 404, statusMessage: 'Game does not exist!', fatal: true})
+}
+
+let prevBlue = {
+  id: 0,
+  score: 0,
+  charging: false,
+  fuel: 25
+}
+
+let prevRed = {
+  id: 0,
+  score: 0,
+  charging: false,
+  fuel: 25
 }
 
 const teamBlueId = ref(Object.values(gameState.value.teams).find(t => t.color === 'blue').id)
 const teamRedId = ref(Object.values(gameState.value.teams).find(t => t.color === 'red').id)
 
 const updateTeams = () => {
-    const btI = Object.values(gameState.value.teams).find(t => t.color === 'blue')
-    const rtI = Object.values(gameState.value.teams).find(t => t.color === 'red')
+  const btI = Object.values(gameState.value.teams).find(t => t.color === 'blue')
+  const rtI = Object.values(gameState.value.teams).find(t => t.color === 'red')
 
-    teamBlueId.value = btI && btI.id || 0
-    teamRedId.value = rtI && rtI.id || 0
+  teamBlueId.value = btI && btI.id || 0
+  teamRedId.value = rtI && rtI.id || 0
 
+  const blueTeam = gameState.value.teams[teamBlueId.value]
+  const redTeam = gameState.value.teams[teamRedId.value]
+
+  let changed = false
+  if (teamBlueId.value !== prevBlue.id || teamRedId.value !== prevRed.id) {
+    prevBlue.id = teamBlueId.value
+    prevRed.id = teamRedId.value
+    changed = true
+  }
+  else if (blueTeam.score !== prevBlue.score || redTeam.score !== prevRed.score) {
+
+    prevBlue.score = blueTeam.score
+    prevRed.score = redTeam.score
+
+    changed = true
+  }
+  else if (blueTeam.charging !== prevBlue.charging ||
+      redTeam.charging !== prevRed.charging) {
+
+    prevBlue.charging = blueTeam.charging
+    prevRed.charging = redTeam.charging
+
+    changed = true
+  }
+  else if (Math.round(blueTeam.fuel) !== prevBlue.fuel ||
+      Math.round(redTeam.fuel) !== prevRed.fuel) {
+
+    prevBlue.fuel = Math.round(blueTeam.fuel)
+    prevRed.fuel = Math.round(redTeam.fuel)
+
+    changed = true
+  }
+
+  if (changed)
     iter.value += iter.value < 10000 ? 1 : -10000
 }
 
@@ -67,17 +115,17 @@ let canvasWidth = ref(600)
 let intervalId;
 onMounted(() => {
 
-    intervalId = setInterval(() => {
-        canvasWidth.value = canvasDiv.value.clientWidth
-        canvasWidth.value = Math.min(canvasWidth.value, window.innerHeight)
-        refresh()
-        updateTeams()
-    }, 100);
+  intervalId = setInterval(() => {
+    canvasWidth.value = canvasDiv.value.clientWidth
+    canvasWidth.value = Math.min(canvasWidth.value, window.innerHeight)
+    refresh()
+    updateTeams()
+  }, 100);
 
 })
 
 onUnmounted(() => {
-    clearInterval(intervalId)
+  clearInterval(intervalId)
 })
 
 </script>
