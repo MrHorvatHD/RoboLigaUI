@@ -19,6 +19,7 @@
                                 :items="robotOptions1"
                                 item-title="display"
                                 item-value="value"
+                                :readonly="!!gameData"
                         ></v-select>
                     </v-col>
                     <v-col cols="6">
@@ -30,6 +31,7 @@
                                 :items="robotOptions2"
                                 item-title="display"
                                 item-value="value"
+                                :readonly="!!gameData"
                         ></v-select>
                     </v-col>
                 </v-row>
@@ -42,8 +44,11 @@
             </v-container>
         </v-card-text>
         <v-card-actions>
-            <v-btn block color="primary" @click="create">
+            <v-btn block color="primary" @click="create" v-if="!gameData">
                 create
+            </v-btn>
+            <v-btn block color="primary" :to="`/game/${gameData.game_id}`" v-else>
+                view
             </v-btn>
         </v-card-actions>
 
@@ -59,7 +64,6 @@
 </template>
 
 <script setup>
-import config from "~/config.json"
 import {useAuthStore} from "~/stores/auth";
 
 const {baseApiUrl} = useRuntimeConfig()
@@ -74,10 +78,14 @@ const blueTeam = ref("")
 const redTeam = ref("")
 const gameData = ref(null)
 
+const {data: teams} = await useFetch(baseApiUrl + `/team`, {
+    method: 'GET',
+})
+
 const robotOptions1 = computed(() => {
-    const options = Object.keys(config.robots).map((key) => ({
-        value: key,
-        display: config.robots[key]
+    const options = teams.value.map((team) => ({
+        value: team.id,
+        display: team.name
     }))
     if (redTeam) {
         return options.filter((option) => option.value !== redTeam.value)
@@ -86,9 +94,9 @@ const robotOptions1 = computed(() => {
 })
 
 const robotOptions2 = computed(() => {
-    const options = Object.keys(config.robots).map((key) => ({
-        value: key,
-        display: config.robots[key]
+    const options = teams.value.map((team) => ({
+        value: team.id,
+        display: team.name
     }))
     if (blueTeam) {
         return options.filter((option) => option.value !== blueTeam.value)

@@ -18,19 +18,6 @@
             </v-col>
         </v-row>
 
-        <v-row v-if="games && games.length > 0">
-            <v-col v-for="game in games" :key="game" cols="6" md="4" class="text-h5">
-                <GameCard :gameId="game"/>
-            </v-col>
-        </v-row>
-        <v-row v-else justify="center" align="center">
-            <v-col cols="4" class="text-button text-grey-lighten-1 myFont">
-                <v-icon icon="mdi-controller-off" size="x-large"/>
-                <p>No games available</p>
-            </v-col>
-        </v-row>
-
-
         <v-row>
             <v-col class="text-h5 myFont">
                 <v-btn color="primary">
@@ -47,6 +34,47 @@
             </v-col>
         </v-row>
 
+        <span v-if="games && games.length > 0">
+
+            <!-- Games created by user -->
+            <v-row>
+                <v-col class="text-h6 myFont">
+                    Created games
+                </v-col>
+                <v-divider/>
+            </v-row>
+            <v-row>
+                <v-col v-for="game in myGames" :key="game" cols="6" md="4"
+                       class="text-h5">
+                    <GameCard :gameId="game" @gameDeleted="refresh"/>
+                </v-col>
+            </v-row>
+
+            <!-- All possible games -->
+            <v-row>
+                <v-col class="text-h6 myFont">
+                    Other games
+                </v-col>
+                <v-divider/>
+            </v-row>
+
+            <v-row>
+                <v-col v-for="game in otherGames" :key="game" cols="6" md="4"
+                       class="text-h5">
+                    <GameCard :gameId="game" @gameDeleted="refresh"/>
+                </v-col>
+            </v-row>
+
+
+        </span>
+        <v-row v-else justify="center" align="center">
+            <v-col cols="4" class="text-button text-grey-lighten-1 myFont">
+                <v-icon icon="mdi-controller-off" size="x-large"/>
+                <p>No games available</p>
+            </v-col>
+        </v-row>
+
+
     </v-container>
 
 </template>
@@ -58,15 +86,26 @@ import NewGameModal from "~/components/landingPage/newGameModal.vue";
 import GameCard from "~/components/landingPage/GameCard.vue";
 
 import config from "~/config.json"
+import {useAuthStore} from "~/stores/auth";
 
 const {baseApiUrl} = useRuntimeConfig()
 let dialog = ref(false)
+const auth = useAuthStore()
 
 const {data: games, refresh} = await useFetch(baseApiUrl + `/game/`, {
-    method: 'GET'
+    method: 'GET',
 })
 
-console.log()
+const myGames = computed(() => {
+    return games.value.filter(g => auth.getMyGames.includes(g)) || []
+})
+
+const otherGames = computed(() => {
+    return games.value.filter(g => !auth.getMyGames.includes(g)) || []
+})
+
+auth.resetGameState(games.value)
+
 
 </script>
 
