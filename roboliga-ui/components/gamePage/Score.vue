@@ -11,7 +11,7 @@
         <v-row justify="center" align="center">
             <v-col cols="10">
                 <v-progress-linear
-                        :indeterminate="team.charging"
+                        :indeterminate="team.charging && team.fuel < 24.7"
                         :model-value="fuelPercent"
                         :color="scoreField.color"
                         :reverse="scoreField.progress">
@@ -23,10 +23,9 @@
 </template>
 
 <script>
-import config from "~/config.json"
 export default {
     name: "Score",
-    props: ["orientation", "team"],
+    props: ["orientation", "team", "maxFuel"],
     setup(props) {
 
         /*const def_team = {
@@ -40,10 +39,8 @@ export default {
 
         const team = ref(props.team)
 
-        const MAX_FUEL = config.robot_time
-
         const fuelPercent = computed(() => {
-             return team.value.fuel / MAX_FUEL * 100
+             return team.value.fuel / props.maxFuel * 100
         })
 
         const scoreField = computed(() => {

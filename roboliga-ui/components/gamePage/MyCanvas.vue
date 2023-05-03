@@ -5,7 +5,7 @@
 
 <script setup>
 const props = defineProps(['gameState', 'canvasWidth'])
-import config from "../../config.json"
+import config from "~/config.json"
 
 const myCanvas = ref(null);
 
@@ -33,7 +33,7 @@ watch(() => props.canvasWidth, () => {
 
 watch(() => props.gameState, () => {
     draw()
-},{ deep: true })
+}, {deep: true})
 
 function CanvasManager(w, h) {
     this.w = w;
@@ -70,7 +70,7 @@ function CanvasManager(w, h) {
         context.strokeStyle = this.colors[key];
         context.stroke()
 
-        if(key !== 'game_field') {
+        if (key !== 'game_field') {
             context.fillStyle = this.colors[key];
             context.fill()
         }
@@ -102,7 +102,7 @@ function CanvasManager(w, h) {
         const context = this.ctx;
         const scale = this.scale;
 
-        const { x, y } = robot.position
+        const {x, y} = robot.position
         const dir = robot.dir
         const shorterLength = 150 * scale
         const longerLength = 270 * scale
@@ -113,7 +113,7 @@ function CanvasManager(w, h) {
         context.fillStyle = props.gameState.teams[key] && props.gameState.teams[key].color || this.colors.box;
 
         context.translate(x * scale, y * scale)
-        context.rotate(((dir-90) * Math.PI) / 180)
+        context.rotate(((dir - 90) * Math.PI) / 180)
         context.beginPath()
         context.moveTo(-shorterLength / 2, longerLength / 3)
         context.lineTo(shorterLength / 2, longerLength / 3)
@@ -136,7 +136,7 @@ function draw() {
     manager.clearField()
 
     for (let key in props.gameState.fields) {
-        if(key !== config.field_key)
+        if (key !== config.field_key)
             manager.drawField(key);
     }
     manager.drawField(config.field_key)
@@ -150,8 +150,6 @@ function draw() {
     }
 
 }
-
-
 
 onMounted(() => {
     manager.setContext(myCanvas.value.getContext('2d'));

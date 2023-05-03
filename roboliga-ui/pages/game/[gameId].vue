@@ -1,31 +1,37 @@
 <template>
-  <v-container fluid class="ma-0 pa-0">
-    <v-row justify="center" align="center">
-      <ControlPanel :game_on="gameState.game_on" :game_paused="gameState.game_paused"
-                    :teamsId="[teamBlueId,teamRedId]"></ControlPanel>
-    </v-row>
+    <v-container fluid class="ma-0 pa-0">
+        <v-row justify="center" align="center">
 
-    <v-row justify="center" align="center" no-gutters>
-      <v-col cols="5" md="5">
-        <Score orientation="left" :team="gameState.teams[teamBlueId]" :key="iter"/>
-      </v-col>
-      <v-col cols="2" md="2">
-        <Clock :time-left="gameState.time_left"></Clock>
-      </v-col>
-      <v-col cols="5" md="5">
-        <Score orientation="right" :team="gameState.teams[teamRedId]" :key="iter+10000"/>
-      </v-col>
+            <v-btn style="position: absolute; left: 0;" icon="mdi-arrow-left" variant="plain"
+                    color="primary" size="x-large" density="compact" :ripple="false" @click="navigateTo('/')"></v-btn>
 
-    </v-row>
+            <ControlPanel :game_on="gameState.game_on" :game_paused="gameState.game_paused"
+                          :teamsId="[teamBlueId,teamRedId]"></ControlPanel>
+        </v-row>
 
-    <v-row justify="center" align="center">
-      <v-col cols="10">
-        <div ref="canvasDiv" class="text-center">
-          <MyCanvas :gameState="gameState" :canvasWidth="canvasWidth"/>
-        </div>
-      </v-col>
-    </v-row>
-  </v-container>
+        <v-row justify="center" align="center" no-gutters>
+            <v-col cols="5" md="5">
+                <Score orientation="left" :team="gameState.teams[teamBlueId]" :maxFuel="gameState.robot_time"
+                       :key="iterBlue"/>
+            </v-col>
+            <v-col cols="2" md="2">
+                <Clock :time-left="gameState.time_left"></Clock>
+            </v-col>
+            <v-col cols="5" md="5">
+                <Score orientation="right" :team="gameState.teams[teamRedId]" :maxFuel="gameState.robot_time"
+                       :key="iterRed"/>
+            </v-col>
+
+        </v-row>
+
+        <v-row justify="center" align="center">
+            <v-col cols="10">
+                <div ref="canvasDiv" class="text-center">
+                    <MyCanvas :gameState="gameState" :canvasWidth="canvasWidth"/>
+                </div>
+            </v-col>
+        </v-row>
+    </v-container>
 
 </template>
 
@@ -34,79 +40,88 @@ import ControlPanel from "~/components/gamePage/ControlPanel.vue";
 import Clock from "~/components/gamePage/Clock.vue";
 import Score from "~/components/gamePage/Score.vue";
 import MyCanvas from "~/components/gamePage/MyCanvas.vue";
+import {navigateTo} from "#app";
 
 const {gameId} = useRoute().params
 const {baseApiUrl} = useRuntimeConfig()
 
-let iter = ref(0)
+let iterBlue = ref(0)
+let iterRed = ref(0)
 
 const {data: gameState, refresh} = await useFetch(baseApiUrl + `/game/${gameId}`, {
-  method: 'GET',
+    method: 'GET',
 })
 
 if (!gameState.value) {
-  throw createError({statusCode: 404, statusMessage: 'Game does not exist!', fatal: true})
+    throw createError({statusCode: 404, statusMessage: 'Game does not exist!', fatal: true})
 }
 
 let prevBlue = {
-  id: 0,
-  score: 0,
-  charging: false,
-  fuel: 25
+    id: 0,
+    score: 0,
+    charging: false,
+    fuel: 25
 }
 
 let prevRed = {
-  id: 0,
-  score: 0,
-  charging: false,
-  fuel: 25
+    id: 0,
+    score: 0,
+    charging: false,
+    fuel: 25
 }
 
 const teamBlueId = ref(Object.values(gameState.value.teams).find(t => t.color === 'blue').id)
 const teamRedId = ref(Object.values(gameState.value.teams).find(t => t.color === 'red').id)
 
 const updateTeams = () => {
-  const btI = Object.values(gameState.value.teams).find(t => t.color === 'blue')
-  const rtI = Object.values(gameState.value.teams).find(t => t.color === 'red')
 
-  teamBlueId.value = btI && btI.id || 0
-  teamRedId.value = rtI && rtI.id || 0
+    const btI = Object.values(gameState.value.teams).find(t => t.color === 'blue')
+    const rtI = Object.values(gameState.value.teams).find(t => t.color === 'red')
 
-  const blueTeam = gameState.value.teams[teamBlueId.value]
-  const redTeam = gameState.value.teams[teamRedId.value]
+    teamBlueId.value = btI && btI.id || 0
+    teamRedId.value = rtI && rtI.id || 0
 
-  let changed = false
-  if (teamBlueId.value !== prevBlue.id || teamRedId.value !== prevRed.id) {
-    prevBlue.id = teamBlueId.value
-    prevRed.id = teamRedId.value
-    changed = true
-  }
-  else if (blueTeam.score !== prevBlue.score || redTeam.score !== prevRed.score) {
+    const blueTeam = gameState.value.teams[teamBlueId.value]
+    const redTeam = gameState.value.teams[teamRedId.value]
 
-    prevBlue.score = blueTeam.score
-    prevRed.score = redTeam.score
+    // check blue
+    // -------------------------------------------------------------------------
+    let changedBlue = false
+    if (teamBlueId.value !== prevBlue.id) {
+        prevBlue.id = teamBlueId.value
+        changedBlue = true
+    } else if (blueTeam.score !== prevBlue.score) {
+        prevBlue.score = blueTeam.score
+        changedBlue = true
+    } else if (blueTeam.fuel !== prevBlue.fuel && !blueTeam.charging) {
+        prevBlue.fuel = blueTeam.fuel
+        changedBlue = true
+    } else if (blueTeam.charging !== prevBlue.charging) {
+        prevBlue.charging = blueTeam.charging
+        changedBlue = true
+    }
+    if (changedBlue)
+        iterBlue.value += iterBlue.value < 10000 ? 1 : -10000
 
-    changed = true
-  }
-  else if (blueTeam.charging !== prevBlue.charging ||
-      redTeam.charging !== prevRed.charging) {
+    // check red
+    // -------------------------------------------------------------------------
+    let changedRed = false
+    if (teamRedId.value !== prevRed.id) {
+        prevRed.id = teamRedId.value
+        changedRed = true
+    } else if (redTeam.score !== prevRed.score) {
+        prevRed.score = redTeam.score
+        changedRed = true
+    } else if (redTeam.fuel !== prevRed.fuel && !redTeam.charging) {
+        prevRed.fuel = redTeam.fuel
+        changedRed = true
+    } else if (redTeam.charging !== prevRed.charging) {
+        prevRed.charging = redTeam.charging
+        changedRed = true
+    }
 
-    prevBlue.charging = blueTeam.charging
-    prevRed.charging = redTeam.charging
-
-    changed = true
-  }
-  else if (Math.round(blueTeam.fuel) !== prevBlue.fuel ||
-      Math.round(redTeam.fuel) !== prevRed.fuel) {
-
-    prevBlue.fuel = Math.round(blueTeam.fuel)
-    prevRed.fuel = Math.round(redTeam.fuel)
-
-    changed = true
-  }
-
-  if (changed)
-    iter.value += iter.value < 10000 ? 1 : -10000
+    if (changedRed)
+        iterRed.value += iterRed.value < 10000 ? 1 : -10000
 }
 
 const canvasDiv = ref(null)
@@ -115,17 +130,17 @@ let canvasWidth = ref(600)
 let intervalId;
 onMounted(() => {
 
-  intervalId = setInterval(() => {
-    canvasWidth.value = canvasDiv.value.clientWidth
-    canvasWidth.value = Math.min(canvasWidth.value, window.innerHeight)
-    refresh()
-    updateTeams()
-  }, 100);
+    intervalId = setInterval(() => {
+        canvasWidth.value = canvasDiv.value.clientWidth
+        canvasWidth.value = Math.min(canvasWidth.value, window.innerHeight)
+        refresh()
+        updateTeams()
+    }, 100);
 
 })
 
 onUnmounted(() => {
-  clearInterval(intervalId)
+    clearInterval(intervalId)
 })
 
 </script>
