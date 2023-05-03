@@ -1,19 +1,6 @@
 {
   "name": "Robo liga Fri 2023: Rudnik",
-  "robot_time": 25,
   "field_key": "game_field",
-  "robots": {
-    "0": "Hansformers",
-    "5": "Unicode Abuse",
-    "9": "Gold Diggers",
-    "10": "Bumblebee",
-    "12": "PeΨ",
-    "14": "ocvrti čipi",
-    "18": "Lolek in Bolek",
-    "19": "Sussy Bakas",
-    "22": "LASPP",
-    "24": "VimEscapees"
-  },
   "field_colors":{
     "blue_basket": "#90CAF9",
     "red_basket": "#EF9A9A",
