@@ -21,7 +21,7 @@ export const useAuthStore = defineStore('authStore', {
         // remove gone games from state
         resetGameState(currentGames) {
             this.games = Object.fromEntries(
-                Object.entries(this.games).filter(([key, value]) => currentGames.includes(key))
+                Object.entries(this.games).filter(([key, value]) => !!currentGames && currentGames.includes(key))
             );
 
         }

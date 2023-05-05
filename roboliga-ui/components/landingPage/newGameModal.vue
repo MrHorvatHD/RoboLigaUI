@@ -83,10 +83,10 @@ const {data: teams} = await useFetch(baseApiUrl + `/team`, {
 })
 
 const robotOptions1 = computed(() => {
-    const options = teams.value.map((team) => ({
+    const options = teams.value && teams.value.map((team) => ({
         value: team.id,
         display: team.name
-    }))
+    })) || []
     if (redTeam) {
         return options.filter((option) => option.value !== redTeam.value)
     }
@@ -94,10 +94,10 @@ const robotOptions1 = computed(() => {
 })
 
 const robotOptions2 = computed(() => {
-    const options = teams.value.map((team) => ({
+    const options = teams.value && teams.value.map((team) => ({
         value: team.id,
         display: team.name
-    }))
+    })) || []
     if (blueTeam) {
         return options.filter((option) => option.value !== blueTeam.value)
     }

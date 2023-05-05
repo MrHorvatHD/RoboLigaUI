@@ -20,7 +20,7 @@
 
         <v-row>
             <v-col class="text-h5 myFont">
-                <v-btn color="primary">
+                <v-btn color="primary" :disabled="serverDown" @click="">
                     New Game
                     <v-dialog
                             v-model="dialog"
@@ -34,7 +34,7 @@
             </v-col>
         </v-row>
 
-        <span v-if="games && games.length > 0">
+        <span v-if="myGames.length > 0 || otherGames.length > 0 ">
 
             <!-- Games created by user -->
             <v-row>
@@ -69,8 +69,8 @@
         </span>
         <v-row v-else justify="center" align="center">
             <v-col cols="4" class="text-button text-grey-lighten-1 myFont">
-                <v-icon icon="mdi-controller-off" size="x-large"/>
-                <p>No games available</p>
+                <v-icon :icon="serverDown ? 'mdi-server-off' : 'mdi-controller-off'" size="x-large"/>
+                <p>{{serverDown ? 'No response from server' : 'No games available'}}</p>
             </v-col>
         </v-row>
 
@@ -92,20 +92,42 @@ const {baseApiUrl} = useRuntimeConfig()
 let dialog = ref(false)
 const auth = useAuthStore()
 
+const serverDown = ref(true)
+
 const {data: games, refresh} = await useFetch(baseApiUrl + `/game/`, {
     method: 'GET',
+    server: false,
+    onResponse({ request, response, options }) {
+        // Process the response data
+        serverDown.value = false
+        setTimeout(() => {
+            auth.resetGameState(response._data)
+        }, 500);
+
+    },
+    onResponseError({ request, response, options }) {
+        // Handle the response errors
+        serverDown.value = false
+    },
+    onRequest({ request, options }) {
+        // Set the request headers
+        serverDown.value = true
+    },
+    onRequestError({ request, options, error }) {
+        // Handle the request errors
+        serverDown.value = true
+    },
 })
 
 const myGames = computed(() => {
-    return games.value.filter(g => auth.getMyGames.includes(g)) || []
+
+    return !!games.value && games.value.filter(g => auth.getMyGames.includes(g)) || []
 })
 
 const otherGames = computed(() => {
-    return games.value.filter(g => !auth.getMyGames.includes(g)) || []
+
+    return !!games.value && games.value.filter(g => !auth.getMyGames.includes(g)) || []
 })
-
-auth.resetGameState(games.value)
-
 
 </script>
 
