@@ -9,32 +9,36 @@
         </v-toolbar>
         <v-card-text>
             <v-container class="text-center" fluid>
-                <v-row justify="center" align="center">
-                    <v-col cols="6">
-                        <v-select
-                                v-model="blueTeam"
-                                label="Blue team"
-                                variant="underlined"
-                                color="blue-lighten-1"
-                                :items="robotOptions1"
-                                item-title="display"
-                                item-value="value"
-                                :readonly="!!gameData"
-                        ></v-select>
-                    </v-col>
-                    <v-col cols="6">
-                        <v-select
-                                v-model="redTeam"
-                                label="Red team"
-                                variant="underlined"
-                                color="red-lighten-1"
-                                :items="robotOptions2"
-                                item-title="display"
-                                item-value="value"
-                                :readonly="!!gameData"
-                        ></v-select>
-                    </v-col>
-                </v-row>
+                <v-form ref="inputForm" v-model="valid">
+                    <v-row justify="center" align="center">
+                        <v-col cols="6">
+                            <v-select
+                                    v-model="blueTeam"
+                                    label="Blue team"
+                                    variant="underlined"
+                                    color="blue-lighten-1"
+                                    :items="robotOptions1"
+                                    item-title="display"
+                                    item-value="value"
+                                    :readonly="!!gameData"
+                                    :rules="selectorRules"
+                            ></v-select>
+                        </v-col>
+                        <v-col cols="6">
+                            <v-select
+                                    v-model="redTeam"
+                                    label="Red team"
+                                    variant="underlined"
+                                    color="red-lighten-1"
+                                    :items="robotOptions2"
+                                    item-title="display"
+                                    item-value="value"
+                                    :readonly="!!gameData"
+                                    :rules="selectorRules"
+                            ></v-select>
+                        </v-col>
+                    </v-row>
+                </v-form>
                 <v-row v-if="gameData">
                     <v-col class="text-body-1 myFont">
                         ID: "{{ gameData.game_id }}"<br>
@@ -82,6 +86,12 @@ const {data: teams} = await useFetch(baseApiUrl + `/team`, {
     method: 'GET',
 })
 
+const selectorRules = [
+    v => typeof v === 'number' || 'Select a team',
+    v => Number.isInteger(v) || 'Select a team',
+    v => v >= 0 || 'Select a team'
+];
+
 const robotOptions1 = computed(() => {
     const options = teams.value && teams.value.map((team) => ({
         value: team.id,
@@ -104,33 +114,41 @@ const robotOptions2 = computed(() => {
     return options
 })
 
+const valid = ref(false)
+const inputForm = ref(null)
 
 async function create() {
-    const {data, error} = await useFetch(baseApiUrl + `/game/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'accept': 'application/json'
-        },
-        body: JSON.stringify({
-            "team_1": blueTeam.value,
-            "team_2": redTeam.value
+    console.log(blueTeam.value)
+    console.log(redTeam.value)
+
+    const {valid} = await inputForm.value.validate()
+    if (valid) {
+        const {data, error} = await useFetch(baseApiUrl + `/game/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'accept': 'application/json'
+            },
+            body: JSON.stringify({
+                "team_1": blueTeam.value,
+                "team_2": redTeam.value
+            })
         })
-    })
-    if (error.value) {
-        snackbar.value = true
-        snackbarText.value = error.value
-        snackbarColor.value = "error"
-    }
-    if (data.value) {
-        snackbar.value = true
-        snackbarText.value = "Game created successfully"
-        snackbarColor.value = ""
+        if (error.value) {
+            snackbar.value = true
+            snackbarText.value = error.value
+            snackbarColor.value = "error"
+        }
+        if (data.value) {
+            snackbar.value = true
+            snackbarText.value = "Game created successfully"
+            snackbarColor.value = ""
 
-        auth.addGame(data.value)
+            auth.addGame(data.value)
 
-        gameData.value = data.value
-        emit('gameCreated')
+            gameData.value = data.value
+            emit('gameCreated')
+        }
     }
 }
 
