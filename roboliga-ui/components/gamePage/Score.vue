@@ -11,7 +11,7 @@
         <v-row justify="center" align="center">
             <v-col cols="10">
                 <v-progress-linear
-                        :indeterminate="team.charging && team.fuel < 24.7"
+                        :indeterminate="team.charging && fuelPercent < 98"
                         :model-value="fuelPercent"
                         :color="scoreField.color"
                         :reverse="scoreField.progress">

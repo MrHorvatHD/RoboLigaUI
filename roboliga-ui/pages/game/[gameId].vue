@@ -3,7 +3,7 @@
         <v-row justify="center" align="center">
 
             <v-btn style="position: absolute; left: 0;" icon="mdi-arrow-left" variant="plain"
-                    color="primary" size="x-large" density="compact" :ripple="false" @click="navigateTo('/')"></v-btn>
+                   color="primary" size="x-large" density="compact" :ripple="false" @click="navigateTo('/')"></v-btn>
 
             <ControlPanel :game_on="gameState.game_on" :game_paused="gameState.game_paused"
                           :teamsId="[teamBlueId,teamRedId]"></ControlPanel>
@@ -93,11 +93,12 @@ const updateTeams = () => {
     } else if (blueTeam.score !== prevBlue.score) {
         prevBlue.score = blueTeam.score
         changedBlue = true
-    } else if (blueTeam.fuel !== prevBlue.fuel && !blueTeam.charging) {
-        prevBlue.fuel = blueTeam.fuel
-        changedBlue = true
-    } else if (blueTeam.charging !== prevBlue.charging) {
+    }
+    if (blueTeam.charging !== prevBlue.charging) {
         prevBlue.charging = blueTeam.charging
+        changedBlue = true
+    } else if (blueTeam.fuel !== prevBlue.fuel) {
+        prevBlue.fuel = blueTeam.fuel
         changedBlue = true
     }
     if (changedBlue)
@@ -112,11 +113,12 @@ const updateTeams = () => {
     } else if (redTeam.score !== prevRed.score) {
         prevRed.score = redTeam.score
         changedRed = true
-    } else if (redTeam.fuel !== prevRed.fuel && !redTeam.charging) {
-        prevRed.fuel = redTeam.fuel
-        changedRed = true
-    } else if (redTeam.charging !== prevRed.charging) {
+    }
+    if (redTeam.charging !== prevRed.charging) {
         prevRed.charging = redTeam.charging
+        changedRed = true
+    } else if (redTeam.fuel !== prevRed.fuel) {
+        prevRed.fuel = redTeam.fuel
         changedRed = true
     }
 
