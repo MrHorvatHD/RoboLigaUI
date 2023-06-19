@@ -1,6 +1,5 @@
 <template>
     <v-container class="text-center">
-
         <v-row justify="center" align="center">
             <v-col>
                 <img class="ma-auto" src="/Robo-liga-FRI-2023-logo-Dark.svg" alt="logo"/>
@@ -20,13 +19,13 @@
 
         <v-row>
             <v-col class="text-h5 myFont">
-                <v-btn color="primary" :disabled="serverDown" @click="">
+                <v-btn color="primary">
                     New Game
                     <v-dialog
-                            v-model="dialog"
-                            activator="parent"
-                            persistent
-                            max-width="800"
+                        v-model="dialog"
+                        activator="parent"
+                        persistent
+                        max-width="800"
                     >
                         <NewGameModal @gameCreated="refresh" @closeModal="dialog=false"></NewGameModal>
                     </v-dialog>
@@ -34,7 +33,18 @@
             </v-col>
         </v-row>
 
-        <span v-if="myGames.length > 0 || otherGames.length > 0 ">
+        {{pending}}
+        {{error}}
+        {{games}}
+
+        <v-row v-if="pending" justify="center" align="center">
+            <v-col cols="4" class="text-button text-grey-lighten-1 myFont">
+                <v-progress-circular indeterminate color="primary"/>
+                <p>Loading games</p>
+            </v-col>
+        </v-row>
+
+        <span v-else-if="games && games.length > 0">
 
             <!-- Games created by user -->
             <v-row>
@@ -69,8 +79,8 @@
         </span>
         <v-row v-else justify="center" align="center">
             <v-col cols="4" class="text-button text-grey-lighten-1 myFont">
-                <v-icon :icon="serverDown ? 'mdi-server-off' : 'mdi-controller-off'" size="x-large"/>
-                <p>{{serverDown ? 'No response from server' : 'No games available'}}</p>
+                <v-icon icon="mdi-controller-off" size="x-large"/>
+                <p>{{!pending && !error ? 'No games available' : 'Error while fetching games' }}</p>
             </v-col>
         </v-row>
 
@@ -87,47 +97,29 @@ import GameCard from "~/components/landingPage/GameCard.vue";
 
 import config from "~/config.json"
 import {useAuthStore} from "~/stores/auth";
+import {useLazyFetch} from "#app";
 
 const {baseApiUrl} = useRuntimeConfig()
 let dialog = ref(false)
 const auth = useAuthStore()
 
-const serverDown = ref(true)
-
-const {data: games, refresh} = await useFetch(baseApiUrl + `/game/`, {
+const {data: games, refresh, pending, error} = useLazyFetch(baseApiUrl + `/game/`, {
     method: 'GET',
-    server: false,
-    onResponse({ request, response, options }) {
-        // Process the response data
-        serverDown.value = false
-        setTimeout(() => {
-            auth.resetGameState(response._data)
-        }, 500);
-
-    },
-    onResponseError({ request, response, options }) {
-        // Handle the response errors
-        serverDown.value = false
-    },
-    onRequest({ request, options }) {
-        // Set the request headers
-        serverDown.value = true
-    },
-    onRequestError({ request, options, error }) {
-        // Handle the request errors
-        serverDown.value = true
-    },
+    default: () => [],
+    immediate: false,
 })
+refresh()
 
 const myGames = computed(() => {
-
-    return !!games.value && games.value.filter(g => auth.getMyGames.includes(g)) || []
+    return games.value.filter(g => auth.getMyGames.includes(g)) || []
 })
 
 const otherGames = computed(() => {
-
-    return !!games.value && games.value.filter(g => !auth.getMyGames.includes(g)) || []
+    return games.value.filter(g => !auth.getMyGames.includes(g)) || []
 })
+
+auth.resetGameState(games.value)
+
 
 </script>
 
